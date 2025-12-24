@@ -1,0 +1,99 @@
+import { cn } from "@/lib/utils";
+import { Alert as AlertType } from "@/data/dashboardData";
+import { AlertTriangle, AlertCircle, Info, Clock, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface AlertsPanelProps {
+  alerts: AlertType[];
+  className?: string;
+}
+
+const alertTypeStyles = {
+  critical: {
+    bg: "bg-destructive/10",
+    border: "border-destructive/30",
+    icon: AlertCircle,
+    iconColor: "text-destructive",
+    glow: "glow-destructive",
+  },
+  warning: {
+    bg: "bg-warning/10",
+    border: "border-warning/30",
+    icon: AlertTriangle,
+    iconColor: "text-warning",
+    glow: "glow-warning",
+  },
+  info: {
+    bg: "bg-primary/10",
+    border: "border-primary/30",
+    icon: Info,
+    iconColor: "text-primary",
+    glow: "glow-primary",
+  },
+};
+
+export function AlertsPanel({ alerts, className }: AlertsPanelProps) {
+  return (
+    <div className={cn("glass-card rounded-lg", className)}>
+      <div className="flex items-center justify-between border-b border-border/50 p-4">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-warning" />
+          <h3 className="font-semibold text-foreground">Predictive Alerts</h3>
+        </div>
+        <span className="rounded-full bg-destructive/20 px-2.5 py-0.5 text-xs font-medium text-destructive">
+          {alerts.filter((a) => a.type === "critical").length} Critical
+        </span>
+      </div>
+      <ScrollArea className="h-[400px]">
+        <div className="space-y-3 p-4">
+          {alerts.map((alert, index) => {
+            const styles = alertTypeStyles[alert.type];
+            const Icon = styles.icon;
+
+            return (
+              <motion.div
+                key={alert.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className={cn(
+                  "group cursor-pointer rounded-lg border p-4 transition-all duration-300 hover:scale-[1.02]",
+                  styles.bg,
+                  styles.border,
+                  alert.type === "critical" && "animate-pulse-glow"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={cn("mt-0.5", styles.iconColor)}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-foreground">
+                        {alert.title}
+                      </h4>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {alert.description}
+                    </p>
+                    <div className="flex items-center gap-4 pt-2">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>Risk in {alert.eta}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {alert.timestamp}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
